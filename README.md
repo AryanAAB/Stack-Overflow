@@ -60,7 +60,7 @@ This will start the server at http://localhost:3000.
 
 Open your web browser and navigate to http://localhost:3000 to view the application.
 
-Usage
+# Usage
 - User Registration: Click on "Sign Up" to create a new user account.
 - User Login: After signing up, you can log in using your credentials.
 - View All Questions: The home page (/) displays all questions and answers posted by users.
