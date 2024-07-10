@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Overflow</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- Ensure the path is correct -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <div class="logo-container">
+                <a href="/" class="logo">
+                    <img src="/media/logo.png" alt="Stack Overflow" class="logoImage">
+                </a>
+            </div>
+            <p class="stack-name">Stack Overflow Login Page</p>
+            <div class="header-right">
+                <a class="active" href="/">Home</a>
+                <a href="/register">Sign Up</a>
+            </div>
+        </div> 
+        <div class="form-container">
+            <h2>User Login</h2>
+            <form id="login-form">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="error-message" id="login-error" style="color: red;"></p>
+            </form>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Stack Overflow. All rights reserved.</p>
+        </div>
+    </div>
+    <script>
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginForm.querySelector('input[name="email"]').value;
+            const password = loginForm.querySelector('input[name="password"]').value;
+      
+            try {
+                let response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+      
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+      
+                let data = await response.json();
+                localStorage.setItem('token', data.token);
+                window.location.href = '/profile';
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-error').textContent = 'Invalid credentials. Please try again.';
+                toastr.error('Invalid credentials. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

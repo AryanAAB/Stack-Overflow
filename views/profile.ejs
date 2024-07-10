@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Overflow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <div class="logo-container">
+                <a href="/profile" class="logo">
+                    <img src="/media/logo.png" alt="Stack Overflow" class="logoImage">
+                </a>
+            </div>
+            <p class="stack-name">Stack Overflow User Profile</p>
+            <div class="header-right">
+                <a class="active" href="/allQuestions">All Questions</a>
+                <a class="active" href="/new-question">Add a Question</a>
+                <button id="logoutButton" class="btn btn-danger">Logout</button>
+            </div>
+        </div> 
+        <h2 style="color:brown; text-align: center;">Welcome to Your Profile Page!</h2>
+        <div class="profile-info">
+            <div class="user-details">
+                <h2>Your information</h2>
+                <p><strong>Username:</strong> <span id="username"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+            </div>
+        </div>
+        <h1 style="color: green; text-align: center;">Your Questions</h1>
+        <ul id="questions-list"></ul>
+        <p id="no-questions-message" style="display:none;">No questions yet. Add your first question today!</p>
+        <h1 style="color: green; text-align: center;">Your Answers</h1>
+        <ul id="answer-list"></ul>
+        <p id="no-answer-message" style="display:none;">No answers yet. Add your first answer today!</p>
+        <div class="footer">
+            <p>&copy; 2024 Stack Overflow. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        window.onload = async function() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+
+                const data = await response.json();
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('email').textContent = data.email;
+                
+                const questionsList = document.getElementById('questions-list');
+                const noQuestionsMessage = document.getElementById('no-questions-message');
+                if (data.questions && data.questions.length > 0) {
+                    data.questions.forEach(question => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <h3>${question.title}</h3>
+                            <p>${question.description}</p>
+                            <small>Posted on: ${new Date(question.postedAt).toLocaleDateString()}</small>
+                            <ul>
+                                ${question.answers.map(answer => `
+                                    <li>
+                                        <p style="color:blue;">${answer.content}</p>
+                                        <small>Answered by: ${answer.userId.username} on ${new Date(answer.postedAt).toLocaleDateString()}</small>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        `;
+                        questionsList.appendChild(li);
+                    });
+                } else {
+                    noQuestionsMessage.style.display = 'block';
+                }
+
+                const answerList = document.getElementById('answer-list');
+                const noAnswerMessage = document.getElementById('no-answer-message');
+                if (data.answers && data.answers.length > 0) {
+                    data.answers.forEach(answer => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <h3>Question: ${answer.questionId.title}</h3>
+                            <p>${answer.questionId.description}</p>
+                            <small>Question posted on: ${new Date(answer.questionId.postedAt).toLocaleDateString()} by ${answer.questionId.userId.username}</small>
+                            <ul>
+                                <li>
+                                    <p style="color:blue;">${answer.content}</p>
+                                    <small>Answered on: ${new Date(answer.postedAt).toLocaleDateString()}</small>
+                                </li>
+                            </ul>
+                        `;
+                        answerList.appendChild(li);
+                    });
+                } else {
+                    noAnswerMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+                toastr.error('Failed to load profile data.');
+            }
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

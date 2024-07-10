@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Overflow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <div class="logo-container">
+                <a href="/profile" class="logo">
+                    <img src="/media/logo.png" alt="Stack Overflow" class="logoImage">
+                </a>
+            </div>
+            <p class="stack-name">Stack Overflow All Questions</p>
+            <div class="header-right">
+                <a class="active" href="/profile">Profile</a>
+                <button id="logoutButton" class="btn btn-danger">Logout</button>
+            </div>
+        </div> 
+    <div class="container">
+        <h1>All Questions</h1>
+        <ul>
+            <% if (questions.length > 0) { %>
+                <% questions.forEach(question => { %>
+                    <li>
+                        <h3><%= question.title %></h3>
+                        <p><%= question.description %></p>
+                        <small>Posted by: <%= question.userId.username %> on <%= new Date(question.postedAt).toLocaleDateString() %></small>
+                        
+                        <% if (question.answers && question.answers.length > 0) { %>
+                            <h4>Answers:</h4>
+                            <ul>
+                                <% question.answers.forEach(answer => { %>
+                                    <li>
+                                        <p><%= answer.content %></p>
+                                        <small>Answered by: <%= answer.userId.username %> on <%= new Date(answer.postedAt).toLocaleDateString() %></small>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        <% } %>
+                        
+                        <form class="answer-form" data-question-id="<%= question._id %>">
+                            <input type="text" name="content" placeholder="Write your answer" required>
+                            <button type="submit">Submit Answer</button>
+                        </form>
+                    </li>
+                <% }) %>
+            <% } else { %>
+                <p>No questions available.</p>
+            <% } %>
+        </ul>
+    </div>
+    <script>
+        document.querySelectorAll('.answer-form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const questionId = form.getAttribute('data-question-id');
+                const content = form.querySelector('input[name="content"]').value;
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('You need to log in to post an answer.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/allQuestions/${questionId}/answers`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ content })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Answer submission failed');
+                    }
+
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Answer submission error:', error);
+                    alert('Failed to submit answer. Please try again.');
+                }
+            });
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/';
+        });
+    </script>
+    <style>
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffe600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        li {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: orangered;
+        }
+
+        p {
+            margin: 10px 0;
+            color: #000289;
+        }
+
+        small {
+            display: block;
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+
+        h4 {
+            margin: 15px 0 10px;
+            color: #495057;
+        }
+
+        .answer-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .answer-form input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .answer-form button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .answer-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</body>
+</html>
