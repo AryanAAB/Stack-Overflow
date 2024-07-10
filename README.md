@@ -51,7 +51,7 @@ Replace <your-mongodb-uri> with your MongoDB connection string and <your-jwt-sec
 4. Start the server
 
 ```
-npm start
+node index.js
 ```
 
 This will start the server at http://localhost:3000.
