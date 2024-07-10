@@ -66,3 +66,8 @@ Open your web browser and navigate to http://localhost:3000 to view the applicat
 - View All Questions: The home page (/) displays all questions and answers posted by users.
 - Ask a Question: Logged-in users can post new questions.
 - Answer a Question: Users can answer questions on the "All Questions" page.
+
+# Video Demonstration
+
+https://github.com/AryanAAB/Stack-Overflow/assets/145079379/d4b7fec7-9ca5-4c44-962c-74df7c8f9a18
+
